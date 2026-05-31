@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电解铝阳极效应模拟系统</title>
+  <script type="module" crossorigin src="/assets/index-CUhzvF5F.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BSR9aOTk.js">
+  <link rel="modulepreload" crossorigin href="/assets/app-DYLRJpYG.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-MgvMdFen.css">
+  <script type="module">import'data:text/javascript,if(!import.meta.resolve)throw Error("import.meta.resolve not supported")';import.meta.url;import("_").catch(()=>1);(async function*(){})().next();window.__vite_is_modern_browser=true</script>
+  <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ 电解铝阳极效应模拟系统</h1>
+            <p class="subtitle">基于气泡成核机理与阳极效应数学模型的实时仿真平台</p>
+        </header>
+
+        <div class="main-content">
+            <div class="simulation-panel">
+                <div class="canvas-wrapper">
+                    <canvas id="simulationCanvas" width="800" height="500"></canvas>
+                    <div class="canvas-overlay">
+                        <div class="status-indicator" id="statusIndicator">
+                            <span class="status-dot" id="statusDot"></span>
+                            <span id="statusText">正常运行</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="voltage-chart">
+                    <h3>槽电压实时曲线</h3>
+                    <canvas id="voltageChart" width="800" height="150"></canvas>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>⚙️ 参数控制</h3>
+                    
+                    <div class="slider-group">
+                        <label for="currentDensity">
+                            电流密度
+                            <span class="value" id="currentDensityValue">0.80 A/cm²</span>
+                        </label>
+                        <input type="range" id="currentDensity" min="0" max="3" step="0.01" value="0.8">
+                        <div class="slider-marks">
+                            <span>0</span>
+                            <span>1.0</span>
+                            <span>2.0</span>
+                            <span class="critical" id="criticalMark">临界</span>
+                            <span>3.0</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="aluminaConcentration">
+                            氧化铝浓度
+                            <span class="value" id="aluminaConcentrationValue">5.00 %</span>
+                        </label>
+                        <input type="range" id="aluminaConcentration" min="0.5" max="10" step="0.1" value="5.0">
+                        <div class="slider-marks">
+                            <span>0.5%</span>
+                            <span>3%</span>
+                            <span>5%</span>
+                            <span>8%</span>
+                            <span>10%</span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="startBtn" class="btn btn-primary">▶ 开始模拟</button>
+                        <button id="pauseBtn" class="btn btn-secondary" disabled>⏸ 暂停</button>
+                        <button id="resetBtn" class="btn btn-warning">↺ 重置</button>
+                        <button id="saveBtn" class="btn btn-success">💾 保存数据</button>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>📊 实时数据</h3>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <span class="data-label">临界电流密度</span>
+                            <span class="data-value" id="criticalCurrentDensity">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">局部电流密度</span>
+                            <span class="data-value" id="localCurrentDensity">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">气泡覆盖率</span>
+                            <span class="data-value" id="bubbleCoverage">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">运行时间</span>
+                            <span class="data-value" id="elapsedTime">-</span>
+                        </div>
+                        <div class="data-item highlight">
+                            <span class="data-label">槽电压</span>
+                            <span class="data-value large" id="cellVoltage">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">弧光强度</span>
+                            <span class="data-value" id="arcIntensity">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">极距</span>
+                            <span class="data-value" id="interpolarDistance">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">阳极消耗</span>
+                            <span class="data-value" id="anodeConsumption">-</span>
+                        </div>
+                        <div class="data-item danger" id="anodeEffectWarning" style="display: none;">
+                            <span class="data-label">⚠️ 阳极效应</span>
+                            <span class="data-value" id="anodeEffectStatus">已发生</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <h3>📜 历史记录</h3>
+                    <div class="history-list" id="historyList">
+                        <p class="empty-hint">暂无历史记录</p>
+                    </div>
+                    <button id="loadHistoryBtn" class="btn btn-small">🔄 刷新记录</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>电解铝阳极效应模拟系统 v1.0 | 基于简化气泡成核与阳极效应模型</p>
+        </footer>
+    </div>
+
+  <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+  <script nomodule crossorigin id="vite-legacy-polyfill" src="/assets/polyfills-legacy-CJ64VNX4.js"></script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="/assets/index-legacy-D9S0uDn4.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+</body>
+</html>
